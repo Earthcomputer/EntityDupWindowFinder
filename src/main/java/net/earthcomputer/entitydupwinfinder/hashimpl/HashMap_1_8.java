@@ -784,21 +784,22 @@ public class HashMap_1_8<K, V> implements Map<K, V> {
 							compareResult = -1;
 						} else if (currentNodeHash < nodeHash) {
 							compareResult = 1;
-						} else if (keyClass == null && (keyClass = comparableClassFor(key)) == null) {
-							compareResult = tieBreakOrder(nodeKey, currentNodeKey);
-						} else if ((compareResult = compareComparables(keyClass, nodeKey, currentNodeKey)) == 0) {
+						} else if ((keyClass == null && (keyClass = comparableClassFor(nodeKey)) == null)
+								|| (compareResult = compareComparables(keyClass, nodeKey, currentNodeKey)) == 0) {
 							compareResult = tieBreakOrder(nodeKey, currentNodeKey);
 						}
-						TreeNode<K, V> currentNodePrev = currentNode;
+
+						TreeNode<K, V> prevCurrentNode = currentNode;
 						currentNode = compareResult <= 0 ? currentNode.left : currentNode.right;
 						if (currentNode == null) {
-							node.parent = currentNodePrev;
+							node.parent = prevCurrentNode;
 							if (compareResult <= 0) {
-								currentNodePrev.left = node;
+								prevCurrentNode.left = node;
 							} else {
-								currentNodePrev.right = right;
+								prevCurrentNode.right = node;
 							}
 							root = balanceInsertion(root, node);
+							break;
 						}
 					}
 				}
@@ -1072,13 +1073,13 @@ public class HashMap_1_8<K, V> implements Map<K, V> {
 			}
 			TreeNode<K, V> nodeRight = node.right;
 			TreeNode<K, V> nodeParent;
-			TreeNode<K, V> nodeLeft;
+			TreeNode<K, V> nodeRightLeft;
 			if (nodeRight != null) {
-				nodeLeft = node.right = node.left;
-				if (nodeLeft != null) {
-					nodeLeft.parent = node;
+				nodeRightLeft = node.right = nodeRight.left;
+				if (nodeRightLeft != null) {
+					nodeRightLeft.parent = node;
 				}
-				nodeParent = nodeRight.parent = nodeLeft.parent;
+				nodeParent = nodeRight.parent = node.parent;
 				if (nodeParent == null) {
 					root = nodeRight;
 					root.red = false;
